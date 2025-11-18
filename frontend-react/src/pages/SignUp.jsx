@@ -2,28 +2,32 @@ import { useState } from "react"
 import Button from "../components/Button"
 import Input from "../components/Input"
 import { api } from "../api/api"
-
+import { Link, useNavigate } from "react-router"
+import { useUserStore } from "../store/useUserStore"
 const SignUp = () => {
     const [error,setError] = useState("")
+    const navigate = useNavigate()
+    const {setSession}= useUserStore()
     const handleSubmit = async (e) => {
         e.preventDefault()
         setError("")
 
-        if (e.target.password != e.target.password2.value){
+        if (e.target.password.value !== e.target.password2.value){
             setError("Пароли не совпадают")
             return
         } 
         const user = {
-            username: e.target.username,
-            email: e.target.email,
-            password: e.target.password
+            username: e.target.username.value,
+            email: e.target.email.value,
+            password: e.target.password.value 
         }
 
         try {
             const data = await api.registerUser(user)
-            console.log (data);
+            setSession(data.data)
+            navigate("/")
         } catch (error) {
-            setError(error.message)
+            setError(error.response.data.message)
             console.error(error)
         }
     }
@@ -68,6 +72,11 @@ const SignUp = () => {
                     />
                     <Button>Зарегестрироваться</Button>
                 </form>
+                 <div className="auth-footer">
+                    <p>
+                        <Link to = {"/signin"}>Войти</Link>
+                    </p>
+                </div>
             </div>
         </div>
     )
